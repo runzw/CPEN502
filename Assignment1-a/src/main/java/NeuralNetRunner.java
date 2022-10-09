@@ -3,7 +3,7 @@ import java.io.File;
 public class NeuralNetRunner {
     public static final double LEARNING_RATE = 0.2;
     public static final double MOMENTUM = 0.0;
-    public static final double LOSS = 50;
+    public static final double LOSS = 0.05;
 
     public static final double [][] X = { {0, 0}, {1, 0}, {0, 1}, {1, 1} };
 
@@ -29,13 +29,6 @@ public class NeuralNetRunner {
         System.out.println("Hidden layer number of neurons:" + hiddenNum);
 
         int epoch = 0;
-        // Initialize a lookuptable
-        LookUpTable lut = new LookUpTable();
-
-        // Train LUT first
-        for(double[] x : X){
-            lut.train(x, (int)x[0] ^ (int)x[1]);
-        }
 
         // Initialize a new neural net
         NeuralNet nn = new NeuralNet(inputNum, hiddenNum, LEARNING_RATE, MOMENTUM, 0, 1, bipolar);
@@ -46,13 +39,14 @@ public class NeuralNetRunner {
         // Train the neural net
         double totalLoss;
         do{
-            System.out.println("================================");
+            System.out.println("=================================================================");
             System.out.println("Epoch: "+epoch);
             totalLoss = 0;
             System.out.println("Start training...");
             for(double [] data: X){
-                System.out.print("Training with " + "{" + data[0] + "," + data[1] + "}: ");
-                double singleLoss = nn.train(data, lut.outputFor(data));
+                System.out.println("Training with " + "{" + data[0] + "," + data[1] + "}:");
+                nn.train(data, (int)data[0] ^ (int)data[1]);
+                double singleLoss = nn.outputFor(data) - ((int)data[0] ^ (int)data[1]);
                 System.out.println("loss: " + singleLoss);
                 totalLoss += 0.5 * Math.pow(singleLoss, 2);
             }

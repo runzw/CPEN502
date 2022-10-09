@@ -1,6 +1,7 @@
 import com.google.gson.Gson;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -15,6 +16,13 @@ public class NeuralNet implements NeuralNetInterface{
     private boolean bipolar;
     private Matrix weightIH;
     private Matrix weightHO;
+    private Matrix biasH;
+    private Matrix biasO;
+    private Matrix d_weightIH;
+    private Matrix d_weightHO;
+    private Matrix d_biasH;
+    private Matrix d_biasO;
+
 
     public NeuralNet(
         int argNumInputs,
@@ -31,19 +39,37 @@ public class NeuralNet implements NeuralNetInterface{
         this.argMomentumTerm = argMomentumTerm;
         this.argA = argA;
         this.argB = argB;
+        this.bipolar = bipolar;
     }
 
     @Override
     public void zeroWeights() {
-        this.weightIH = new Matrix(argNumInputs, argNumHidden);
-        this.weightHO = new Matrix(argNumHidden, ARG_NUM_OUTPUTS);
+        this.weightIH = new Matrix(argNumHidden, argNumInputs);
+        this.weightHO = new Matrix(ARG_NUM_OUTPUTS, argNumHidden);
+
+        this.biasH = new Matrix(argNumHidden, 1);
+        this.biasO = new Matrix(ARG_NUM_OUTPUTS, 1);
+
+        this.d_weightIH = new Matrix(argNumHidden, argNumInputs);
+        this.d_biasH = new Matrix(argNumHidden, 1);
+        this.d_weightHO = new Matrix(ARG_NUM_OUTPUTS, argNumHidden);
+        this.d_biasO = new Matrix(ARG_NUM_OUTPUTS, 1);
         return;
     }
 
     @Override
     public void initializeWeights() {
-        this.weightIH = new Matrix(argNumInputs, argNumHidden, -0.5, 0.5);
-        this.weightHO = new Matrix(argNumHidden, ARG_NUM_OUTPUTS, -0.5, 0.5);
+        this.weightIH = new Matrix(argNumHidden, argNumInputs, -0.5, 0.5);
+        this.weightHO = new Matrix(ARG_NUM_OUTPUTS, argNumHidden, -0.5, 0.5);
+
+        this.biasH = new Matrix(argNumHidden, 1, -0.5, 0.5);
+        this.biasO = new Matrix(ARG_NUM_OUTPUTS, 1, -0.5, 0.5);
+
+        this.d_weightIH = new Matrix(argNumHidden, argNumInputs);
+        this.d_biasH = new Matrix(argNumHidden, 1);
+        this.d_weightHO = new Matrix(ARG_NUM_OUTPUTS, argNumHidden);
+        this.d_biasO = new Matrix(ARG_NUM_OUTPUTS, 1);
+
         return;
     }
 
@@ -51,14 +77,25 @@ public class NeuralNet implements NeuralNetInterface{
     public double outputFor(double[] X) {
         // Input to hidden
         Matrix dataI = Matrix.parseArray(X);
-        Matrix dataH = Matrix.multiply(dataI, weightIH);
+        Matrix dataH = Matrix.multiply(weightIH, dataI);
+        dataH.add(biasH);
 
         // Activation function input -> hidden
-        dataH.msigmoid(this.argA, this.argB);
+        if (this.bipolar) {
+            dataH.bipolarSigmoid();
+        } else {
+            dataH.msigmoid(this.argA, this.argB);
+        }
 
         // Hidden to output
-        Matrix dataO = Matrix.multiply(dataH, weightHO);
-        dataO.msigmoid(this.argA, this.argB);
+        Matrix dataO = Matrix.multiply(weightHO, dataH);
+        dataO.add(biasO);
+        if (this.bipolar) {
+            dataO.bipolarSigmoid();
+        } else {
+            dataO.msigmoid(this.argA, this.argB);
+        }
+
         double output = Matrix.toArray(dataO)[0];
 
         return output;
@@ -66,13 +103,77 @@ public class NeuralNet implements NeuralNetInterface{
 
     @Override
     public double train(double[] X, double argValue) {
-        // Calculate loss
-        double expected = argValue;
-        double actual = outputFor(X);
-        double loss = actual - expected;
+        // Input to hidden
 
-        // TODO: backward propogation
+        Matrix dataI = Matrix.parseArray(X);
+        Matrix dataH = Matrix.multiply(weightIH, dataI);
+        dataH.add(biasH);
 
+        // Activation function input -> hidden
+        if (this.bipolar) {
+            dataH.bipolarSigmoid();
+        } else {
+            dataH.msigmoid(this.argA, this.argB);
+        }
+
+        // Hidden to output
+        Matrix dataO = Matrix.multiply(weightHO, dataH);
+        dataO.add(biasO);
+
+        if (this.bipolar) {
+            dataO.bipolarSigmoid();
+        } else {
+            dataO.msigmoid(this.argA, this.argB);
+        }
+
+        double output = Matrix.toArray(dataO)[0];
+
+        //loss computation
+        System.out.println("Actual output: " + output);
+        System.out.println("Expected output: " + argValue);
+        double loss = output - argValue;
+        Matrix lossM = new Matrix(1,1);
+        lossM.add(loss);
+
+        // hidden to output gradient
+        Matrix gradient = this.getGradient(dataO);
+        gradient.multiply(lossM);
+        gradient.multiply(argLearningRate);
+
+        //momentum
+        Matrix hiddenDataTranpose = Matrix.transpose(dataH);
+        Matrix deltaHiddenData = Matrix.multiply(gradient, hiddenDataTranpose);
+
+        //update hidden to output weight
+        d_weightHO.multiply(argMomentumTerm);
+        d_weightHO.add(deltaHiddenData);
+        d_biasO.multiply(argMomentumTerm);
+        d_biasO.add(gradient);
+
+        weightHO.add(d_weightHO);
+        biasO.add(d_biasO);
+
+        Matrix h_o_weight_transpose = Matrix.transpose(weightHO);
+        // h_o_w_t 4*1 lossM 1*1
+        Matrix hidden_loss = Matrix.multiply(h_o_weight_transpose, lossM);
+
+        //gradient for input to hidden
+        Matrix hidden_gradient = this.getGradient(dataH);
+        // hidden_gradient 4*1 hidden_loss 4*1 -> 1*1
+        hidden_gradient.multiply(hidden_loss);
+        hidden_gradient.multiply(argLearningRate);
+
+        //momentum
+        Matrix inputDataTranspose = Matrix.transpose(dataI);
+        Matrix deltaInputData = Matrix.multiply(hidden_gradient, inputDataTranspose);
+
+        //update input to hidden weight
+        d_weightIH.multiply(argMomentumTerm);
+        d_weightIH.add(deltaInputData);
+        d_biasH.multiply(argMomentumTerm);
+        d_biasH.add(hidden_gradient);
+        weightIH.add(d_weightIH);
+        biasH.add(d_biasH);
 
         return loss;
     }
@@ -106,8 +207,17 @@ public class NeuralNet implements NeuralNetInterface{
     public void save(File argFile) {
         Gson gson = new Gson();
         String jsonModel = gson.toJson(this);
-        System.out.println("Model: " + jsonModel);
+        // FileWriter myWriter = new FileWriter("filename.txt");
+
         return;
+    }
+
+    private Matrix getGradient(Matrix m) {
+        if (this.bipolar) {
+            return m.dbipolarSigmoid();
+        } else {
+            return m.dsigmoid(0, 1 );
+        }
     }
 
     public int getArgNumInputs() {

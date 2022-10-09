@@ -37,6 +37,7 @@ public interface NeuralNetInterface extends CommonInterface{
         return (b-a) / (1 + Math.exp(-x)) - a;
     }
 
+
     /**
      * Initialize the weights to random values.
      * For say 2 inputs, the input vector is [0] & [1]. We add [2] for the bias.

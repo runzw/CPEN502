@@ -13,7 +13,18 @@ public class Matrix {
         }
     }
 
-    public Matrix(int rows,int cols, double min, double max) {
+    public Matrix(int rows, int cols, double value) {
+        m = new double[rows][cols];
+        this.rows = rows;
+        this.cols = cols;
+        for(int i = 0; i < rows; i++){
+            for(int j = 0; j < cols; j++){
+                m[i][j] = value;
+            }
+        }
+    }
+
+    public Matrix(int rows, int cols, double min, double max) {
         m = new double[rows][cols];
         double range = max - min;
         this.rows = rows;
@@ -35,8 +46,7 @@ public class Matrix {
 
     public void add(Matrix mtx) {
         if(cols!=mtx.cols || rows!=mtx.rows) {
-            System.out.println("Shape Mismatch!");
-            return;
+            System.out.println("+++++++++++++++++++++++++++++++++");
         }
 
         for(int i = 0; i < rows; i++){
@@ -57,6 +67,7 @@ public class Matrix {
     }
 
     public static Matrix multiply(Matrix a, Matrix b) {
+        if(a.cols != b.rows) System.out.println("****************************");
         Matrix res = new Matrix(a.rows,b.cols);
         for(int i = 0; i < res.rows; i++){
             for(int j = 0; j < res.cols; j++){
@@ -70,6 +81,24 @@ public class Matrix {
         return res;
     }
 
+    public void multiply(double a) {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                m[i][j] *= a;
+            }
+        }
+    }
+
+    public void multiply(Matrix a) {
+        if(a.cols != this.cols) System.out.println("****************************");
+        if(a.rows != this.rows) System.out.println("****************************");
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                m[i][j] *= a.m[i][j];
+            }
+        }
+    }
+
     public void msigmoid(double a, double b) {
         for(int i=0;i<rows;i++)
         {
@@ -78,18 +107,61 @@ public class Matrix {
         }
     }
 
+    public Matrix dsigmoid(double a, double b){
+        Matrix res = new Matrix(rows, cols);
+        for(int i=0;i<rows;i++)
+        {
+            for(int j=0;j<cols;j++)
+                res.m[i][j] = m[i][j] * (1 - m[i][j]);
+        }
+        return res;
+    }
+
+    public double bipolarSigmoid(double x) {
+        return 2 / (1 + Math.exp(-x)) - 1;
+    }
+
+    public void bipolarSigmoid() {
+        for (int i = 0; i < this.rows; i++) {
+            for (int j = 0; j < this.cols; j++) {
+                this.m[i][j] = bipolarSigmoid(this.m[i][j]);
+            }
+        }
+    }
+
+    public Matrix dbipolarSigmoid(){
+        Matrix res = new Matrix(rows, cols);
+        for (int i = 0; i < this.rows; i++) {
+            for (int j = 0; j < this.cols; j++) {
+                res.m[i][j] = (m[i][j] + 1) * (1 - m[i][j]) / 2;
+            }
+        }
+        return res;
+
+    }
+
+    public static Matrix transpose(Matrix a) {
+        Matrix res = new Matrix(a.cols, a.rows);
+        for (int i = 0; i < a.rows; i++) {
+            for (int j = 0; j < a.cols; j++) {
+                res.m[j][i] = a.m[i][j];
+            }
+        }
+        return res;
+    }
+
     public static Matrix parseArray(double[] array){
-        Matrix res = new Matrix(1, array.length);
-        for(int i = 0; i < res.cols; i++){
-            res.m[0][i] = array[i];
+        Matrix res = new Matrix(array.length, 1);
+        for (int i = 0; i < res.rows; i++) {
+            res.m[i][0] = array[i];
         }
         return res;
     }
 
     public static double[] toArray(Matrix mtx){
         double[] res = new double[mtx.cols];
-        for(int i = 0; i < mtx.cols; i++){
-            res[i] = mtx.m[0][i];
+        for (int i = 0; i < mtx.rows; i++) {
+            res[i] = mtx.m[i][0];
         }
         return res;
     }
