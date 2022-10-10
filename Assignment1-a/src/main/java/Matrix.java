@@ -46,7 +46,7 @@ public class Matrix {
 
     public void add(Matrix mtx) {
         if(cols!=mtx.cols || rows!=mtx.rows) {
-            System.out.println("+++++++++++++++++++++++++++++++++");
+            return;
         }
 
         for(int i = 0; i < rows; i++){
@@ -67,7 +67,7 @@ public class Matrix {
     }
 
     public static Matrix multiply(Matrix a, Matrix b) {
-        if(a.cols != b.rows) System.out.println("****************************");
+        if(a.cols != b.rows) return null;
         Matrix res = new Matrix(a.rows,b.cols);
         for(int i = 0; i < res.rows; i++){
             for(int j = 0; j < res.cols; j++){
@@ -90,8 +90,8 @@ public class Matrix {
     }
 
     public void multiply(Matrix a) {
-        if(a.cols != this.cols) System.out.println("****************************");
-        if(a.rows != this.rows) System.out.println("****************************");
+        if(a.cols != this.cols) return;
+        if(a.rows != this.rows) return;
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 m[i][j] *= a.m[i][j];

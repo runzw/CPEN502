@@ -104,7 +104,6 @@ public class NeuralNet implements NeuralNetInterface{
     @Override
     public double train(double[] X, double argValue) {
         // Input to hidden
-
         Matrix dataI = Matrix.parseArray(X);
         Matrix dataH = Matrix.multiply(weightIH, dataI);
         dataH.add(biasH);
@@ -129,9 +128,7 @@ public class NeuralNet implements NeuralNetInterface{
         double output = Matrix.toArray(dataO)[0];
 
         //loss computation
-        System.out.println("Actual output: " + output);
-        System.out.println("Expected output: " + argValue);
-        double loss = output - argValue;
+        double loss = argValue - output;
         Matrix lossM = new Matrix(1,1);
         lossM.add(loss);
 
@@ -200,15 +197,25 @@ public class NeuralNet implements NeuralNetInterface{
 
         this.weightIH = loadedNN.getWeightIH();
         this.weightHO = loadedNN.getWeightHO();
+        this.biasH = loadedNN.getBiasH();
+        this.biasO = loadedNN.getBiasO();
+        this.d_weightIH = loadedNN.getD_weightIH();
+        this.d_weightHO = loadedNN.getD_weightHO();
+        this.d_biasO = loadedNN.getD_biasO();
+        this.d_biasH = loadedNN.getD_biasH();
         return;
     }
 
     @Override
-    public void save(File argFile) {
+    public void save(File argFile) throws IOException {
         Gson gson = new Gson();
         String jsonModel = gson.toJson(this);
-        // FileWriter myWriter = new FileWriter("filename.txt");
-
+        if(!argFile.exists()){
+            argFile.createNewFile();
+        }
+        FileWriter myWriter = new FileWriter(argFile.getAbsolutePath());
+        myWriter.write(jsonModel);
+        myWriter.close();
         return;
     }
 
@@ -254,6 +261,30 @@ public class NeuralNet implements NeuralNetInterface{
 
     public boolean isBipolar() {
         return bipolar;
+    }
+
+    public Matrix getBiasH() {
+        return biasH;
+    }
+
+    public Matrix getBiasO() {
+        return biasO;
+    }
+
+    public Matrix getD_biasH() {
+        return d_biasH;
+    }
+
+    public Matrix getD_biasO() {
+        return d_biasO;
+    }
+
+    public Matrix getD_weightHO() {
+        return d_weightHO;
+    }
+
+    public Matrix getD_weightIH() {
+        return d_weightIH;
     }
 
     public static int getArgNumOutputs() {
