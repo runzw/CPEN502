@@ -157,7 +157,7 @@ public class RLRobot extends AdvancedRobot {
 
         switch (currentAction) {
             case circle: {
-                setTurnGunRight(enemyBearing + 90);
+                setTurnRight(enemyBearing + 90);
                 setAhead(50 * circleDirection);
                 break;
             }
@@ -167,7 +167,7 @@ public class RLRobot extends AdvancedRobot {
                 break;
             }
             case advance: {
-                setTurnGunRight(enemyBearing);
+                setTurnRight(enemyBearing);
                 setAhead(100);
                 break;
             }

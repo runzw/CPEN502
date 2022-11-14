@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="70768382-1f3a-46f6-ab02-20974816ddb1" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHome" value="E:\Jetbrains\IntelliJ IDEA\plugins\maven\lib\maven3" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectId" id="2HVjfE5C9AHPE7FT0nhfp8WO1FH" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="project.structure.last.edited" value="Libraries" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="70768382-1f3a-46f6-ab02-20974816ddb1" name="Default Changelist" comment="" />
+      <created>1668377246680</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1668377246680</updated>
+      <workItem from="1668377248035" duration="4351000" />
+      <workItem from="1668458429266" duration="908000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="745" y="377" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1668377519334">
+      <screen x="0" y="0" width="2048" height="1152" />
+    </state>
+    <state x="745" y="377" key="#com.intellij.fileTypes.FileTypeChooser/0.0.2048.1152@0.0.2048.1152" timestamp="1668377519334" />
+    <state x="505" y="151" key="SettingsEditor" timestamp="1668377426706">
+      <screen x="0" y="0" width="2048" height="1152" />
+    </state>
+    <state x="505" y="151" key="SettingsEditor/0.0.2048.1152@0.0.2048.1152" timestamp="1668377426706" />
+  </component>
+</project>
