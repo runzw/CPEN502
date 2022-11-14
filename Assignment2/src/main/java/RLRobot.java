@@ -306,9 +306,13 @@ public class RLRobot extends AdvancedRobot {
                 break;
             }
             case advance:
-            case retreat: {
                 setTurnRight(30);
                 setBack(50);
+                execute();
+                break;
+            case retreat: {
+                setTurnRight(30);
+                setAhead(50);
                 execute();
                 break;
             }
