@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>Assignment2</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>6</source>
+                    <target>6</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>
+        <dependency>
+            <groupId>net.sf.robocode</groupId>
+            <artifactId>robocode.roborumble</artifactId>
+            <version>1.9.4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.robocode</groupId>
+            <artifactId>robocode.samples</artifactId>
+            <version>1.9.4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.robocode</groupId>
+            <artifactId>robocode.repository</artifactId>
+            <version>1.9.4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.robocode</groupId>
+            <artifactId>robocode.sound</artifactId>
+            <version>1.9.4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.robocode</groupId>
+            <artifactId>robocode.ui</artifactId>
+            <version>1.9.4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.robocode</groupId>
+            <artifactId>robocode.battle</artifactId>
+            <version>1.9.4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.robocode</groupId>
+            <artifactId>robocode.core</artifactId>
+            <version>1.9.4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.robocode</groupId>
+            <artifactId>robocode.host</artifactId>
+            <version>1.9.4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.robocode</groupId>
+            <artifactId>robocode.api</artifactId>
+            <version>1.9.4.7</version>
+        </dependency>
+    </dependencies>
+
+
+</project>

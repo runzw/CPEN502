@@ -1,0 +1,21 @@
+Start writing loggamma,   1.00
+alpha,   0.50
+epsilon, 0.25
+badInstantReward, -0.50
+badTerminalReward, -0.50
+goodInstantReward, 2.00
+goodTerminalReward, 2.00
+
+Round: 0 - 100  win percentage, 29.0
+Round: 100 - 200  win percentage, 34.0
+Round: 200 - 300  win percentage, 44.0
+Round: 300 - 400  win percentage, 27.0
+Round: 400 - 500  win percentage, 30.0
+Round: 500 - 600  win percentage, 29.0
+Round: 600 - 700  win percentage, 29.0
+Round: 700 - 800  win percentage, 32.0
+Round: 800 - 900  win percentage, 31.0
+Round: 900 - 1000  win percentage, 28.0
+Round: 1000 - 1100  win percentage, 40.0
+Round: 1100 - 1200  win percentage, 36.0
+Round: 1200 - 1300  win percentage, 24.0

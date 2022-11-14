@@ -84,10 +84,5 @@ public class NeuralNetRunner {
         System.out.println("=================================================================");
         System.out.println("Training finished!");
         System.out.println("Average Epoch: " + (double)sumEpoch/trial);
-
-        // Save the neural net
-//        System.out.println("Saving the model...");
-//        nn.save(new File("model.json"));
-//        System.out.println("Model saved!");
     }
 }
