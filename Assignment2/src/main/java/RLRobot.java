@@ -1,18 +1,19 @@
-import java.util.Random;
-import java.awt.Color;
-
 import robocode.*;
 
-public class RLRobot extends AdvancedRobot {
+import java.awt.*;
+import java.io.IOException;
+import java.util.Random;
 
-    private String lutFilename = getClass().getSimpleName() + "-lut.txt";
+import static robocode.util.Utils.normalRelativeAngleDegrees;
+
+public class RLRobot extends AdvancedRobot {
+    private String saveClassname =  getClass().getSimpleName() + ".txt";
 
     public enum enumEnergy {zero, dying, low, medium, high}
 
-    public enum enumDistance {veryClose, close, near, far}
+    public enum enumDistance {exClose, close, near, far, exFar}
 
-    public enum enumAction {circle, retreat, advance, head2Center, fire}
-
+    public enum enumAction {circle, retreat, advance, fire, toCenter}
     public enum enumOptionalMode {scan, performanceAction}
 
     static private RLRobotLUT q = new RLRobotLUT(
@@ -33,6 +34,7 @@ public class RLRobot extends AdvancedRobot {
     private enumDistance currentDistanceToCenter = enumDistance.near;
     private enumAction currentAction = enumAction.circle;
 
+
     private enumEnergy previousMyEnergy = enumEnergy.high;
     private enumEnergy previousEnemyEnergy = enumEnergy.high;
     private enumDistance previousDistanceToEnemy = enumDistance.near;
@@ -42,9 +44,9 @@ public class RLRobot extends AdvancedRobot {
     private enumOptionalMode optionalMode = enumOptionalMode.scan;
 
     // set RL
-    private double gamma = 1.0;
+    private double gamma = 0.75;
     private double alpha = 0.5;
-    private final double epsilon_initial = 0.25;
+    private final double epsilon_initial = 0.35;
     private double epsilon = epsilon_initial;
     private boolean decayEpsilon = false;
 
@@ -70,25 +72,23 @@ public class RLRobot extends AdvancedRobot {
 
     double totalReward = 0.0;
 
-    int circleDirection = 1;
+    int direction = 1;
 
 
     // Logging
-    static String logFilename = "CrimsonTyphoon2.0.log";
-    static String logFilename2 = "TotalRewards.log";
+    static String logFilename = "robotLUT.log";
     static LogFile log = null;
-    static LogFile log2 = null;
 
     // get center of board
     int xMid = 0;
     int yMid = 0;
 
     public void run() {
-        // set colors
-        setBulletColor(Color.red);
-        setGunColor(Color.black);
         setBodyColor(Color.red);
-        setRadarColor(Color.white);
+        setGunColor(Color.black);
+        setRadarColor(Color.yellow);
+        setBulletColor(Color.green);
+        setScanColor(Color.green);
 
         // get coordinate of the board center
         int xMid = (int) getBattleFieldWidth() / 2;
@@ -99,18 +99,14 @@ public class RLRobot extends AdvancedRobot {
             System.out.print("!!!*********************!!!");
             System.out.print(logFilename);
             log = new LogFile(getDataFile(logFilename));
-            log.stream.printf("Start writing log");
+            log.stream.printf("Start writing log\n");
             log.stream.printf("gamma,   %2.2f\n", gamma);
             log.stream.printf("alpha,   %2.2f\n", alpha);
             log.stream.printf("epsilon, %2.2f\n", epsilon);
-            log.stream.printf("badInstantReward, %2.2f\n", badTerminalReward);
+            log.stream.printf("badInstantReward, %2.2f\n", badReward);
             log.stream.printf("badTerminalReward, %2.2f\n", badTerminalReward);
-            log.stream.printf("goodInstantReward, %2.2f\n", goodTerminalReward);
+            log.stream.printf("goodInstantReward, %2.2f\n", goodReward);
             log.stream.printf("goodTerminalReward, %2.2f\n\n", goodTerminalReward);
-        }
-
-        if (log2 == null){
-            log2 = new LogFile((getDataFile(logFilename2)));
         }
 
         while (true) {
@@ -122,8 +118,6 @@ public class RLRobot extends AdvancedRobot {
 
             robotMovement();
             radarMovement();
-
-//            q.save(getDataFile("lutFile.dat"));
 
             if (getGunHeat() == 0)
                 execute();
@@ -158,11 +152,11 @@ public class RLRobot extends AdvancedRobot {
         switch (currentAction) {
             case circle: {
                 setTurnRight(enemyBearing + 90);
-                setAhead(50 * circleDirection);
+                setAhead(50 * direction);
                 break;
             }
             case fire: {
-                turnGunRight(getHeading() - getGunHeading() + enemyBearing);
+                turnGunRight(normalRelativeAngleDegrees(getHeading() - getGunHeading() + enemyBearing));
                 setFire(3);
                 break;
             }
@@ -176,7 +170,7 @@ public class RLRobot extends AdvancedRobot {
                 setAhead(100);
                 break;
             }
-            case head2Center: {
+            case toCenter: {
                 double bearing = getBearingToCenter(getX(), getY(), xMid, yMid, getHeadingRadians());
                 setTurnRight(bearing);
                 setAhead(100);
@@ -226,8 +220,6 @@ public class RLRobot extends AdvancedRobot {
     public void onDeath(DeathEvent e) {
         currentReward = badTerminalReward;
         totalReward += currentReward;
-        log2.stream.printf("%2.1f\n", totalReward);
-        log2.stream.flush();
         totalReward = 0;
 
         // Update Q, otherwise it won't be updated at the last round
@@ -245,21 +237,19 @@ public class RLRobot extends AdvancedRobot {
             numRoundsTo100++;
             totalNumRounds++;
         } else {
-            log.stream.printf("Round: %d - %d  win percentage, %2.1f\n", totalNumRounds - 100, totalNumRounds, 100.0 * numWins / numRoundsTo100);
+            log.stream.printf("%d - %d  win rate, %2.1f\n", totalNumRounds - 100, totalNumRounds, 100.0 * numWins / numRoundsTo100);
             log.stream.flush();
             numRoundsTo100 = 0;
             numWins = 0;
         }
 
-        q.save(getDataFile("lutFile.dat"));
+        q.save(getDataFile(saveClassname));
     }
 
     @Override
     public void onWin(WinEvent e) {
         currentReward = goodTerminalReward;
         totalReward += currentReward;
-        log2.stream.printf("%2.1f\n", totalReward);
-        log2.stream.flush();
         totalReward = 0;
 
         // Update Q, otherwise it won't be updated at the last round
@@ -278,13 +268,13 @@ public class RLRobot extends AdvancedRobot {
             totalNumRounds++;
             numWins++;
         } else {
-            log.stream.printf("Round: %d - %d  win percentage, %2.1f\n", totalNumRounds - 100, totalNumRounds, 100.0 * numWins / numRoundsTo100);
+            log.stream.printf("%d - %d  win rate, %2.1f\n", totalNumRounds - 100, totalNumRounds, 100.0 * numWins / numRoundsTo100);
             log.stream.flush();
             numRoundsTo100 = 0;
             numWins = 0;
         }
 
-        q.save(getDataFile("lutFile.dat"));
+        q.save(getDataFile(saveClassname));
     }
 
     @Override
@@ -296,20 +286,26 @@ public class RLRobot extends AdvancedRobot {
     @Override
     public void onHitRobot(HitRobotEvent e) {
         super.onHitRobot(e);
+//        if (e.isMyFault()) {
+//            currentReward = badReward;
+//            totalReward += currentReward;
+//        }
         avoidObstacle();
     }
 
     public void avoidObstacle() {
         switch (currentAction) {
             case circle: {
-                circleDirection = circleDirection * -1;
+                direction = direction * -1;
+                setAhead(50 * direction);
                 break;
             }
-            case advance:
+            case advance: {
                 setTurnRight(30);
                 setBack(50);
                 execute();
                 break;
+            }
             case retreat: {
                 setTurnRight(30);
                 setAhead(50);
@@ -374,18 +370,19 @@ public class RLRobot extends AdvancedRobot {
 
     public enumDistance enumDistanceOf(double distance) {
         enumDistance d = null;
-        if (distance < 50) d = enumDistance.veryClose;
+        if (distance < 50) d = enumDistance.exClose;
         else if (distance >= 50 && distance < 250) d = enumDistance.close;
         else if (distance >= 250 && distance < 500) d = enumDistance.near;
-        else if (distance >= 500) d = enumDistance.far;
+        else if (distance >= 500 && distance < 750) d = enumDistance.far;
+        else if (distance >= 750) d = enumDistance.exFar;
         return d;
     }
 
     public enumEnergy enumEnergyOf(double energy) {
         enumEnergy e = null;
         if (energy == 0) e = enumEnergy.zero;
-        else if (energy > 0 && energy < 15) e = enumEnergy.dying;
-        else if (energy >= 15 && energy < 40) e = enumEnergy.low;
+        else if (energy > 0 && energy < 20) e = enumEnergy.dying;
+        else if (energy >= 20 && energy < 40) e = enumEnergy.low;
         else if (energy >= 40 && energy < 60) e = enumEnergy.medium;
         else if (energy >= 60) e = enumEnergy.high;
         return e;
@@ -407,6 +404,5 @@ public class RLRobot extends AdvancedRobot {
         double b = Math.PI / 2 - Math.atan2(toY - fromY, toX - fromX);
         return norm(b - currentHeadingRadians);
     }
-
 
 }
