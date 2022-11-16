@@ -9,8 +9,8 @@ RLRobotLUT.class
 RLRobotOnPolicy$enumEnergy.class
 RLRobotOnPolicy$enumAction.class
 RLRobot$enumEnergy.class
-RLRobot$enumDistance.class
 RLRobot$enumOptionalMode.class
-RLRobot$enumAction.class
+RLRobot$enumDistance.class
 RLRobotOnPolicy$enumDistance.class
+RLRobot$enumAction.class
 RLRobotOnPolicy.class

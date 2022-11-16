@@ -1,7 +1,7 @@
 import robocode.*;
 
 import java.awt.*;
-import java.io.IOException;
+
 import java.util.Random;
 
 import static robocode.util.Utils.normalRelativeAngleDegrees;
@@ -28,27 +28,27 @@ public class RLRobot extends AdvancedRobot {
     static int numRoundsTo100 = 0;
     static int numWins = 0;
 
-    private enumEnergy currentMyEnergy = enumEnergy.high;
-    private enumEnergy currentEnemyEnergy = enumEnergy.high;
-    private enumDistance currentDistanceToEnemy = enumDistance.near;
-    private enumDistance currentDistanceToCenter = enumDistance.near;
+    private enumEnergy myCurrentEnergy = enumEnergy.high;
+    private enumEnergy enemyCurrentEnergy = enumEnergy.high;
+    private enumDistance distanceToEnemy = enumDistance.near;
+    private enumDistance distanceToCenter = enumDistance.near;
     private enumAction currentAction = enumAction.circle;
 
 
-    private enumEnergy previousMyEnergy = enumEnergy.high;
-    private enumEnergy previousEnemyEnergy = enumEnergy.high;
-    private enumDistance previousDistanceToEnemy = enumDistance.near;
-    private enumDistance previousDistanceToCenter = enumDistance.near;
-    private enumAction previousAction = enumAction.circle;
+    private enumEnergy prevMyEnergy = enumEnergy.high;
+    private enumEnergy prevEnemyEnergy = enumEnergy.high;
+    private enumDistance prevDistanceToEnemy = enumDistance.near;
+    private enumDistance prevDistanceToCenter = enumDistance.near;
+    private enumAction prevAction = enumAction.circle;
 
     private enumOptionalMode optionalMode = enumOptionalMode.scan;
 
-    // set RL
-    private double gamma = 0.75;
-    private double alpha = 0.5;
-    private final double epsilon_initial = 0.35;
-    private double epsilon = epsilon_initial;
-    private boolean decayEpsilon = false;
+ 
+    private double gamma = 0.9;
+    private double alpha = 0.9;
+    private final double e_initial = 0.35;
+    private double e = e_initial;
+    private boolean decaye = false;
 
     //previous and current Q
     private double currentQ = 0.0;
@@ -102,7 +102,7 @@ public class RLRobot extends AdvancedRobot {
             log.stream.printf("Start writing log\n");
             log.stream.printf("gamma,   %2.2f\n", gamma);
             log.stream.printf("alpha,   %2.2f\n", alpha);
-            log.stream.printf("epsilon, %2.2f\n", epsilon);
+            log.stream.printf("e, %2.2f\n", e);
             log.stream.printf("badInstantReward, %2.2f\n", badReward);
             log.stream.printf("badTerminalReward, %2.2f\n", badTerminalReward);
             log.stream.printf("goodInstantReward, %2.2f\n", goodReward);
@@ -111,8 +111,8 @@ public class RLRobot extends AdvancedRobot {
 
         while (true) {
 
-            // set epsilon to 0 after 8000 round
-            if (totalNumRounds > 5000) epsilon = 0;
+            // set e to 0 after 8000 round
+            if (totalNumRounds > 5000) e = 0;
 
             System.out.println("Flag 1");
 
@@ -124,11 +124,11 @@ public class RLRobot extends AdvancedRobot {
 
             // Update previous Q
             double[] x = new double[]{
-                    previousMyEnergy.ordinal(),
-                    previousDistanceToEnemy.ordinal(),
-                    previousEnemyEnergy.ordinal(),
-                    previousDistanceToCenter.ordinal(),
-                    previousAction.ordinal()};
+                    prevMyEnergy.ordinal(),
+                    prevDistanceToEnemy.ordinal(),
+                    prevEnemyEnergy.ordinal(),
+                    prevDistanceToCenter.ordinal(),
+                    prevAction.ordinal()};
 
             q.train(x, computeQ(currentReward));
 
@@ -138,7 +138,7 @@ public class RLRobot extends AdvancedRobot {
     }
 
     private void robotMovement() {
-        if (Math.random() < epsilon)
+        if (Math.random() < e)
             // exploit
             currentAction = selectRandomAction();
         else
@@ -193,16 +193,16 @@ public class RLRobot extends AdvancedRobot {
         myEnergy = getEnergy();
 
         // Update states
-        previousMyEnergy = currentMyEnergy;
-        previousDistanceToCenter = currentDistanceToCenter;
-        previousDistanceToEnemy = currentDistanceToEnemy;
-        previousEnemyEnergy = currentEnemyEnergy;
-        previousAction = currentAction;
+        prevMyEnergy = myCurrentEnergy;
+        prevDistanceToCenter = distanceToCenter;
+        prevDistanceToEnemy = distanceToEnemy;
+        prevEnemyEnergy = enemyCurrentEnergy;
+        prevAction = currentAction;
 
-        currentMyEnergy = enumEnergyOf(getEnergy());
-        currentDistanceToCenter = enumDistanceOf(distanceToCenter(myX, myY, xMid, yMid));
-        currentDistanceToEnemy = enumDistanceOf(e.getDistance());
-        currentEnemyEnergy = enumEnergyOf(e.getEnergy());
+        myCurrentEnergy = enumEnergyOf(getEnergy());
+        distanceToCenter = enumDistanceOf(distanceToCenter(myX, myY, xMid, yMid));
+        distanceToEnemy = enumDistanceOf(e.getDistance());
+        enemyCurrentEnergy = enumEnergyOf(e.getEnergy());
         optionalMode = enumOptionalMode.performanceAction;
     }
 
@@ -224,11 +224,11 @@ public class RLRobot extends AdvancedRobot {
 
         // Update Q, otherwise it won't be updated at the last round
         double[] x = new double[]{
-                previousMyEnergy.ordinal(),
-                previousDistanceToEnemy.ordinal(),
-                previousEnemyEnergy.ordinal(),
-                previousDistanceToCenter.ordinal(),
-                previousAction.ordinal()};
+                prevMyEnergy.ordinal(),
+                prevDistanceToEnemy.ordinal(),
+                prevEnemyEnergy.ordinal(),
+                prevDistanceToCenter.ordinal(),
+                prevAction.ordinal()};
 
         q.train(x, computeQ(currentReward));
 
@@ -254,11 +254,11 @@ public class RLRobot extends AdvancedRobot {
 
         // Update Q, otherwise it won't be updated at the last round
         double[] x = new double[]{
-                previousMyEnergy.ordinal(),
-                previousDistanceToEnemy.ordinal(),
-                previousEnemyEnergy.ordinal(),
-                previousDistanceToCenter.ordinal(),
-                previousAction.ordinal()};
+                prevMyEnergy.ordinal(),
+                prevDistanceToEnemy.ordinal(),
+                prevEnemyEnergy.ordinal(),
+                prevDistanceToCenter.ordinal(),
+                prevAction.ordinal()};
 
         q.train(x, computeQ(currentReward));
 
@@ -318,23 +318,23 @@ public class RLRobot extends AdvancedRobot {
 
     public double computeQ(double r) {
         enumAction maxA = selectBestAction(
-                currentMyEnergy.ordinal(),
-                currentDistanceToEnemy.ordinal(),
-                currentEnemyEnergy.ordinal(),
-                currentDistanceToCenter.ordinal());
+                myCurrentEnergy.ordinal(),
+                distanceToEnemy.ordinal(),
+                enemyCurrentEnergy.ordinal(),
+                distanceToCenter.ordinal());
 
         double[] prevStateAction = new double[]{
-                previousMyEnergy.ordinal(),
-                previousDistanceToEnemy.ordinal(),
-                previousEnemyEnergy.ordinal(),
-                previousDistanceToCenter.ordinal(),
-                previousAction.ordinal()};
+                prevMyEnergy.ordinal(),
+                prevDistanceToEnemy.ordinal(),
+                prevEnemyEnergy.ordinal(),
+                prevDistanceToCenter.ordinal(),
+                prevAction.ordinal()};
 
         double[] currentStateAction = new double[]{
-                currentMyEnergy.ordinal(),
-                currentDistanceToEnemy.ordinal(),
-                currentEnemyEnergy.ordinal(),
-                currentDistanceToCenter.ordinal(),
+                myCurrentEnergy.ordinal(),
+                distanceToEnemy.ordinal(),
+                enemyCurrentEnergy.ordinal(),
+                distanceToCenter.ordinal(),
                 maxA.ordinal()};
 
         double prevQ = q.outputFor(prevStateAction);
