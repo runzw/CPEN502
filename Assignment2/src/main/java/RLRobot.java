@@ -44,8 +44,8 @@ public class RLRobot extends AdvancedRobot {
     private enumOptionalMode optionalMode = enumOptionalMode.scan;
 
     // set RL
-    private double gamma = 0.75;
-    private double alpha = 0.5;
+    private double gamma = 0.9;
+    private double alpha = 0.9;
     private final double epsilon_initial = 0.35;
     private double epsilon = epsilon_initial;
     private boolean decayEpsilon = false;
