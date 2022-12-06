@@ -27,6 +27,7 @@ public class RLRobot extends AdvancedRobot {
     static int totalNumRounds = 0;
     static int numRoundsTo100 = 0;
     static int numWins = 0;
+    static double sumTotalReward = 0;
 
     private enumEnergy currentMyEnergy = enumEnergy.high;
     private enumEnergy currentEnemyEnergy = enumEnergy.high;
@@ -220,7 +221,6 @@ public class RLRobot extends AdvancedRobot {
     public void onDeath(DeathEvent e) {
         currentReward = badTerminalReward;
         totalReward += currentReward;
-        totalReward = 0;
 
         // Update Q, otherwise it won't be updated at the last round
         double[] x = new double[]{
@@ -236,12 +236,12 @@ public class RLRobot extends AdvancedRobot {
         if (numRoundsTo100 < 100) {
             numRoundsTo100++;
             totalNumRounds++;
+            sumTotalReward += totalReward;
         } else {
-            log.stream.printf("%d - %d  win rate, %2.1f\n", totalNumRounds - 100, totalNumRounds, 100.0 * numWins / numRoundsTo100);
-            log.stream.flush();
-            numRoundsTo100 = 0;
-            numWins = 0;
+            printLog();
         }
+
+        totalReward = 0;
 
         q.save(getDataFile(saveClassname));
     }
@@ -250,7 +250,6 @@ public class RLRobot extends AdvancedRobot {
     public void onWin(WinEvent e) {
         currentReward = goodTerminalReward;
         totalReward += currentReward;
-        totalReward = 0;
 
         // Update Q, otherwise it won't be updated at the last round
         double[] x = new double[]{
@@ -267,14 +266,23 @@ public class RLRobot extends AdvancedRobot {
             numRoundsTo100++;
             totalNumRounds++;
             numWins++;
+            sumTotalReward += totalReward;
         } else {
-            log.stream.printf("%d - %d  win rate, %2.1f\n", totalNumRounds - 100, totalNumRounds, 100.0 * numWins / numRoundsTo100);
-            log.stream.flush();
-            numRoundsTo100 = 0;
-            numWins = 0;
+            printLog();
         }
 
+        totalReward = 0;
+
         q.save(getDataFile(saveClassname));
+    }
+
+    private void printLog() {
+        log.stream.printf("%d - %d  win rate, %2.1f\n", totalNumRounds - 100, totalNumRounds, 100.0 * numWins / numRoundsTo100);
+        log.stream.printf("%2.1f", sumTotalReward / 100);
+        log.stream.flush();
+        numRoundsTo100 = 0;
+        numWins = 0;
+        sumTotalReward = 0;
     }
 
     @Override
