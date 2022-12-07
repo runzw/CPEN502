@@ -9,13 +9,13 @@ import com.github.sh0nk.matplotlib4j.PythonExecutionException;
 
 
 public class NeuralNetRunner {
-    public static final double LEARNING_RATE = 0.2;
-    public static final double MOMENTUM = 0.9;
+    public static final double LEARNING_RATE = 0.7;
+    public static final double MOMENTUM = 0;
     public static final double LOSS = 0.05;
     public static final double TRIALS = 10;
 
-    //public static final double [][] X = { {0, 0}, {1, 0}, {0, 1}, {1, 1} };
-    public static final double [][] X = { {-1, -1}, {-1, 1}, {1, -1}, {1, 1} };
+    public static final double [][] X = { {0, 0}, {1, 0}, {0, 1}, {1, 1} };
+    //public static final double [][] X = { {-1, -1}, {-1, 1}, {1, -1}, {1, 1} };
 
     public static void main(String[] args) throws IOException, PythonExecutionException {
         if(args.length != 3){
@@ -56,7 +56,7 @@ public class NeuralNetRunner {
             do{
                 totalLoss = 0;
                 for(double [] data: X){
-                    double singleLoss = nn.train(data, /*(int)data[0] ^ (int)data[1]*/ data[0] == data[1] ? -1 : 1);
+                    double singleLoss = nn.train(data, (int)data[0] ^ (int)data[1] /*data[0] == data[1] ? -1 : 1*/);
                     totalLoss += 0.5 * Math.pow(singleLoss, 2);
                 }
                 map.put(epoch, totalLoss);
