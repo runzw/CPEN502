@@ -257,5 +257,21 @@ public class RLRobotLUT implements LUTInterface {
         }
     }
 
+    public void normalize() {
+        for (int a = 0; a < numDim1Levels; a++) {
+            for (int b = 0; b < numDim2Levels; b++) {
+                for (int c = 0; c < numDim3Levels; c++) {
+                    for (int d = 0; d < numDim4Levels; d++) {
+                        for (int e = 0; e < numDim5Levels; e++) {
+                            lut[a][b][c][d][e] = Math.max(lut[a][b][c][d][e], -6);
+                            lut[a][b][c][d][e] = Math.min(lut[a][b][c][d][e], 6);
+                            lut[a][b][c][d][e] /= 6;
+                            System.out.println(lut[a][b][c][d][e]);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
